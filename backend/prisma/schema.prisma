@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum TradeStatus {
+  PLANNED
+  OPEN
+  CLOSED
+  CANCELLED
+}
+
+enum TradeDirection {
+  LONG
+  SHORT
+}
+
+enum TradeEventType {
+  ENTRY
+  ADD
+  REDUCE
+  MOVE_SL
+  MOVE_TP
+  EXIT
+  NOTE
+}
+
+model User {
+  id           String       @id @default(auto()) @map("_id") @db.ObjectId
+  email        String       @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  trades       Trade[]
+  setups       Setup[]
+  tags         Tag[]
+  riskPolicy   RiskPolicy?
+  accounts     Account[]
+}
+
+model Account {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  currency  String   @default("USD")
+  createdAt DateTime @default(now())
+  trades    Trade[]
+}
+
+model Setup {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String  @db.ObjectId
+  user        User    @relation(fields: [userId], references: [id])
+  name        String
+  description String?
+  trades      Trade[]
+}
+
+model Tag {
+  id      String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId  String     @db.ObjectId
+  user    User       @relation(fields: [userId], references: [id])
+  name    String
+  trades  TradeTag[]
+}
+
+model Trade {
+  id                   String         @id @default(auto()) @map("_id") @db.ObjectId
+  userId               String         @db.ObjectId
+  user                 User           @relation(fields: [userId], references: [id])
+  accountId            String?        @db.ObjectId
+  account              Account?       @relation(fields: [accountId], references: [id])
+  setupId              String?        @db.ObjectId
+  setup                Setup?         @relation(fields: [setupId], references: [id])
+  symbol               String
+  direction            TradeDirection
+  status               TradeStatus    @default(PLANNED)
+  plannedEntry         Float
+  plannedStopLoss      Float
+  plannedTakeProfit    Float
+  plannedRiskReward    Float?
+  plannedRiskAmount    Float?
+  maxHoldMinutes       Int?
+  notes                String?
+  emotionalState       String?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  closedAt             DateTime?
+  actualEntryPrice     Float?
+  actualExitPrice      Float?
+  pnl                  Float?
+  rMultiple            Float?
+  compliedWithPlan     Boolean?
+  events               TradeEvent[]
+  tags                 TradeTag[]
+  attachments          Attachment[]
+}
+
+model TradeEvent {
+  id         String         @id @default(auto()) @map("_id") @db.ObjectId
+  tradeId    String         @db.ObjectId
+  trade      Trade          @relation(fields: [tradeId], references: [id])
+  type       TradeEventType
+  price      Float?
+  size       Float?
+  occurredAt DateTime       @default(now())
+  note       String?
+}
+
+model TradeTag {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  tradeId String @db.ObjectId
+  tagId   String @db.ObjectId
+  trade   Trade  @relation(fields: [tradeId], references: [id])
+  tag     Tag    @relation(fields: [tagId], references: [id])
+
+  @@unique([tradeId, tagId])
+}
+
+model Attachment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  tradeId   String   @db.ObjectId
+  trade     Trade    @relation(fields: [tradeId], references: [id])
+  url       String
+  createdAt DateTime @default(now())
+}
+
+model RiskPolicy {
+  id                      String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId                  String   @unique @db.ObjectId
+  user                    User     @relation(fields: [userId], references: [id])
+  maxRiskPerTrade         Float?
+  maxDailyLoss            Float?
+  maxConsecutiveLosses    Int?
+  maxTradeDurationMinutes Int?
+  updatedAt               DateTime @updatedAt
+}

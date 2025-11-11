@@ -1,0 +1,68 @@
+<div class="card">
+  <h2>Trades</h2>
+  <form [formGroup]="filterForm" (ngSubmit)="load()" class="grid two" style="margin-bottom: 1rem;">
+    <div>
+      <label>Symbol</label>
+      <input formControlName="symbol" placeholder="EURUSD" />
+    </div>
+    <div>
+      <label>Status</label>
+      <select formControlName="status">
+        <option value="">Any</option>
+        <option value="PLANNED">Planned</option>
+        <option value="OPEN">Open</option>
+        <option value="CLOSED">Closed</option>
+        <option value="CANCELLED">Cancelled</option>
+      </select>
+    </div>
+    <div>
+      <label>Direction</label>
+      <select formControlName="direction">
+        <option value="">Any</option>
+        <option value="LONG">Long</option>
+        <option value="SHORT">Short</option>
+      </select>
+    </div>
+    <div>
+      <label>From</label>
+      <input type="date" formControlName="from" />
+    </div>
+    <div>
+      <label>To</label>
+      <input type="date" formControlName="to" />
+    </div>
+    <div style="display: flex; align-items: flex-end; gap: 0.5rem;">
+      <button type="submit">Apply</button>
+      <button type="button" class="secondary" (click)="filterForm.reset(); load();">Reset</button>
+    </div>
+  </form>
+  <table class="table" *ngIf="trades.length; else empty">
+    <thead>
+      <tr>
+        <th>Symbol</th>
+        <th>Status</th>
+        <th>Direction</th>
+        <th>Planned R/R</th>
+        <th>Result R</th>
+        <th>Tags</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let trade of trades">
+        <td>{{ trade.symbol }}</td>
+        <td>{{ trade.status }}</td>
+        <td>{{ trade.direction }}</td>
+        <td>{{ trade.plannedRiskReward | number: '1.2-2' }}</td>
+        <td>{{ trade.rMultiple || '-' }}</td>
+        <td>
+          <span *ngFor="let tradeTag of trade.tags" class="tag">{{ tradeTag.tag.name }}</span>
+        </td>
+        <td><button class="secondary" (click)="openTrade(trade)">Open</button></td>
+      </tr>
+    </tbody>
+  </table>
+  <ng-template #empty>
+    <p>No trades found yet. <a routerLink="/trades/new">Plan one</a>.</p>
+  </ng-template>
+</div>

@@ -1,0 +1,24 @@
+<div class="layout" *ngIf="(user | async) as userState; else loading">
+  <aside class="sidebar">
+    <div>
+      <h2>Trade Diary</h2>
+      <p>{{ userState?.name || userState?.email }}</p>
+    </div>
+    <nav>
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/trades" routerLinkActive="active">Trades</a>
+      <a routerLink="/trades/new" routerLinkActive="active">Plan Trade</a>
+      <a routerLink="/catalogs" routerLinkActive="active">Setups & Tags</a>
+      <a routerLink="/risk" routerLinkActive="active">Risk Rules</a>
+    </nav>
+    <button (click)="logout()">Logout</button>
+  </aside>
+  <main class="main">
+    <router-outlet></router-outlet>
+  </main>
+</div>
+<ng-template #loading>
+  <div class="main">
+    <p>Loading...</p>
+  </div>
+</ng-template>
