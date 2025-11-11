@@ -1,0 +1,39 @@
+{
+  "name": "trade-diary-backend",
+  "version": "1.0.0",
+  "description": "Trading diary backend API built with Node.js, Express, and Prisma",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@prisma/client": "5.14.0",
+    "bcryptjs": "2.4.3",
+    "cors": "2.8.5",
+    "csv-stringify": "6.4.0",
+    "date-fns": "3.6.0",
+    "express": "4.19.2",
+    "express-validator": "7.0.1",
+    "helmet": "7.1.0",
+    "jsonwebtoken": "9.0.2",
+    "multer": "1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "2.4.2",
+    "@types/cors": "2.8.17",
+    "@types/express": "4.17.21",
+    "@types/jsonwebtoken": "9.0.5",
+    "@types/node": "20.12.7",
+    "@types/multer": "1.4.7",
+    "prisma": "5.14.0",
+    "ts-node": "10.9.2",
+    "ts-node-dev": "2.0.0",
+    "typescript": "5.4.5",
+    "vitest": "1.5.0"
+  }
+}

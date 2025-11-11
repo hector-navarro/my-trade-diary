@@ -1,0 +1,23 @@
+<div class="card">
+  <h2>Risk rules</h2>
+  <form [formGroup]="form" (ngSubmit)="save()" class="grid two">
+    <div>
+      <label>Max risk per trade</label>
+      <input type="number" formControlName="maxRiskPerTrade" step="0.01" />
+    </div>
+    <div>
+      <label>Max daily loss</label>
+      <input type="number" formControlName="maxDailyLoss" step="0.01" />
+    </div>
+    <div>
+      <label>Max consecutive losses</label>
+      <input type="number" formControlName="maxConsecutiveLosses" />
+    </div>
+    <div>
+      <label>Max trade duration (minutes)</label>
+      <input type="number" formControlName="maxTradeDurationMinutes" />
+    </div>
+  </form>
+  <button (click)="save()" style="margin-top: 1rem;">Save</button>
+  <div *ngIf="message" class="alert warning" style="margin-top: 1rem;">{{ message }}</div>
+</div>

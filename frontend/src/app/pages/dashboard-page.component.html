@@ -1,0 +1,100 @@
+<div class="grid" *ngIf="overview; else loading">
+  <div class="grid two">
+    <div class="card">
+      <h3>Win rate</h3>
+      <p>{{ (overview.metrics.winRate * 100) | number: '1.0-2' }}%</p>
+    </div>
+    <div class="card">
+      <h3>Average R</h3>
+      <p>{{ overview.metrics.averageR | number: '1.2-2' }}</p>
+    </div>
+    <div class="card">
+      <h3>Expectation</h3>
+      <p>{{ overview.metrics.expectancy | number: '1.2-2' }}</p>
+    </div>
+    <div class="card">
+      <h3>Drawdown</h3>
+      <p>{{ overview.metrics.drawdown | number: '1.2-2' }}</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Equity Curve</h3>
+    <div *ngIf="overview.equityCurve?.length; else noCurve">
+      <ul>
+        <li *ngFor="let point of overview.equityCurve">
+          {{ point.closedAt | date: 'shortDate' }} - {{ point.equity | number: '1.2-2' }}
+        </li>
+      </ul>
+    </div>
+    <ng-template #noCurve>
+      <p>No closed trades yet.</p>
+    </ng-template>
+  </div>
+
+  <div class="card">
+    <h3>Top Symbols</h3>
+    <table class="table" *ngIf="overview.bySymbol?.length; else noSymbol">
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Trades</th>
+          <th>Avg PnL</th>
+          <th>Avg R</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of overview.bySymbol">
+          <td>{{ row.symbol }}</td>
+          <td>{{ row._count._all }}</td>
+          <td>{{ row._avg.pnl | number: '1.2-2' }}</td>
+          <td>{{ row._avg.rMultiple | number: '1.2-2' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <ng-template #noSymbol>
+      <p>No data yet.</p>
+    </ng-template>
+  </div>
+
+  <div class="card">
+    <h3>Top Setups</h3>
+    <table class="table" *ngIf="overview.bySetup?.length; else noSetup">
+      <thead>
+        <tr>
+          <th>Setup</th>
+          <th>Trades</th>
+          <th>Avg R</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of overview.bySetup">
+          <td>{{ row.setupName }}</td>
+          <td>{{ row._count._all }}</td>
+          <td>{{ row._avg.rMultiple | number: '1.2-2' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <ng-template #noSetup>
+      <p>No data yet.</p>
+    </ng-template>
+  </div>
+
+  <div class="card">
+    <h3>Common Deviations</h3>
+    <ul *ngIf="deviations.length; else noDev">
+      <li *ngFor="let deviation of deviations">
+        {{ deviation.symbol }} -
+        <span *ngIf="deviation.movedSLAgainstPlan">Moved SL against plan </span>
+        <span *ngIf="deviation.exitedEarly">Exited early </span>
+        <span *ngIf="deviation.exceededTime">Exceeded time </span>
+      </li>
+    </ul>
+    <ng-template #noDev>
+      <p>No deviations recorded yet.</p>
+    </ng-template>
+  </div>
+</div>
+<ng-template #loading>
+  <p>Loading dashboard...</p>
+</ng-template>
