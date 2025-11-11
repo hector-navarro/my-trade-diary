@@ -1,0 +1,53 @@
+<div class="grid two">
+  <div class="card">
+    <h2>Setups</h2>
+    <form [formGroup]="setupForm" (ngSubmit)="createSetup()">
+      <label>Name</label>
+      <input formControlName="name" />
+      <label>Description</label>
+      <textarea formControlName="description" rows="2"></textarea>
+      <button type="submit">Add setup</button>
+    </form>
+    <ul>
+      <li *ngFor="let setup of setups" style="display:flex; justify-content: space-between; align-items:center;">
+        <div>
+          <strong>{{ setup.name }}</strong>
+          <p>{{ setup.description }}</p>
+        </div>
+        <button class="danger" (click)="deleteSetup(setup.id)">Delete</button>
+      </li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Tags</h2>
+    <form [formGroup]="tagForm" (ngSubmit)="createTag()">
+      <label>Name</label>
+      <input formControlName="name" />
+      <button type="submit">Add tag</button>
+    </form>
+    <ul>
+      <li *ngFor="let tag of tags" style="display:flex; justify-content: space-between; align-items:center;">
+        <span>{{ tag.name }}</span>
+        <button class="danger" (click)="deleteTag(tag.id)">Delete</button>
+      </li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Accounts</h2>
+    <form [formGroup]="accountForm" (ngSubmit)="createAccount()">
+      <label>Name</label>
+      <input formControlName="name" />
+      <label>Currency</label>
+      <input formControlName="currency" />
+      <button type="submit">Add account</button>
+    </form>
+    <ul>
+      <li *ngFor="let account of accounts" style="display:flex; justify-content: space-between; align-items:center;">
+        <span>{{ account.name }} ({{ account.currency }})</span>
+        <button class="danger" (click)="deleteAccount(account.id)">Delete</button>
+      </li>
+    </ul>
+  </div>
+</div>

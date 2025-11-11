@@ -1,0 +1,76 @@
+<div class="card">
+  <h2>Plan new trade</h2>
+  <p>Risk/Reward: {{ riskReward | number: '1.2-2' }}</p>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="grid two">
+    <div>
+      <label>Symbol</label>
+      <input formControlName="symbol" placeholder="Ticker" />
+    </div>
+    <div>
+      <label>Direction</label>
+      <select formControlName="direction">
+        <option [value]="'LONG'">Long</option>
+        <option [value]="'SHORT'">Short</option>
+      </select>
+    </div>
+    <div>
+      <label>Planned Entry</label>
+      <input type="number" formControlName="plannedEntry" step="0.0001" />
+    </div>
+    <div>
+      <label>Stop Loss</label>
+      <input type="number" formControlName="plannedStopLoss" step="0.0001" />
+    </div>
+    <div>
+      <label>Take Profit</label>
+      <input type="number" formControlName="plannedTakeProfit" step="0.0001" />
+    </div>
+    <div>
+      <label>Planned Risk (optional)</label>
+      <input type="number" formControlName="plannedRiskAmount" step="0.01" />
+    </div>
+    <div>
+      <label>Max hold (minutes)</label>
+      <input type="number" formControlName="maxHoldMinutes" />
+    </div>
+    <div>
+      <label>Setup</label>
+      <select formControlName="setupId">
+        <option [value]="null">None</option>
+        <option *ngFor="let setup of setups" [value]="setup.id">{{ setup.name }}</option>
+      </select>
+    </div>
+    <div>
+      <label>Account</label>
+      <select formControlName="accountId">
+        <option [value]="null">Default</option>
+        <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
+      </select>
+    </div>
+    <div>
+      <label>Tags</label>
+      <select formControlName="tags" multiple size="4">
+        <option *ngFor="let tag of tags" [ngValue]="tag.id">{{ tag.name }}</option>
+      </select>
+    </div>
+    <div>
+      <label>Notes</label>
+      <textarea formControlName="notes" rows="3"></textarea>
+    </div>
+    <div>
+      <label>Emotional state</label>
+      <textarea formControlName="emotionalState" rows="2"></textarea>
+    </div>
+  </form>
+  <button (click)="submit()" style="margin-top: 1rem;">Save plan</button>
+  <div *ngIf="alerts.length" class="alert warning" style="margin-top: 1rem;">
+    <p><strong>Risk alerts:</strong></p>
+    <ul>
+      <li *ngFor="let alert of alerts">{{ alert.message }}</li>
+    </ul>
+    <button *ngIf="createdTradeId" class="secondary" (click)="router.navigate(['/trades', createdTradeId])">
+      Revisar trade de todos modos
+    </button>
+  </div>
+  <div *ngIf="error" class="alert danger">{{ error }}</div>
+</div>

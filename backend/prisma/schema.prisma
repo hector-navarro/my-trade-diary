@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum TradeStatus {
+  PLANNED
+  OPEN
+  CLOSED
+  CANCELLED
+}
+
+enum TradeDirection {
+  LONG
+  SHORT
+}
+
+enum TradeEventType {
+  ENTRY
+  ADD
+  REDUCE
+  MOVE_SL
+  MOVE_TP
+  EXIT
+  NOTE
+}
+
+model User {
+  id           Int          @id @default(autoincrement())
+  email        String       @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  trades       Trade[]
+  setups       Setup[]
+  tags         Tag[]
+  riskPolicy   RiskPolicy?
+  accounts     Account[]
+}
+
+model Account {
+  id        Int      @id @default(autoincrement())
+  name      String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  currency  String   @default("USD")
+  createdAt DateTime @default(now())
+  trades    Trade[]
+}
+
+model Setup {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  name      String
+  description String?
+  trades    Trade[]
+}
+
+model Tag {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  name      String
+  trades    TradeTag[]
+}
+
+model Trade {
+  id                   Int             @id @default(autoincrement())
+  user                 User            @relation(fields: [userId], references: [id])
+  userId               Int
+  account              Account?        @relation(fields: [accountId], references: [id])
+  accountId            Int?
+  setup                Setup?          @relation(fields: [setupId], references: [id])
+  setupId              Int?
+  symbol               String
+  direction            TradeDirection
+  status               TradeStatus     @default(PLANNED)
+  plannedEntry         Float
+  plannedStopLoss      Float
+  plannedTakeProfit    Float
+  plannedRiskReward    Float?
+  plannedRiskAmount    Float?
+  maxHoldMinutes       Int?
+  notes                String?
+  emotionalState       String?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  closedAt             DateTime?
+  actualEntryPrice     Float?
+  actualExitPrice      Float?
+  pnl                  Float?
+  rMultiple            Float?
+  compliedWithPlan     Boolean?
+  events               TradeEvent[]
+  tags                 TradeTag[]
+  attachments          Attachment[]
+}
+
+model TradeEvent {
+  id        Int            @id @default(autoincrement())
+  trade     Trade          @relation(fields: [tradeId], references: [id])
+  tradeId   Int
+  type      TradeEventType
+  price     Float?
+  size      Float?
+  occurredAt DateTime      @default(now())
+  note      String?
+}
+
+model TradeTag {
+  trade   Trade @relation(fields: [tradeId], references: [id])
+  tradeId Int
+  tag     Tag   @relation(fields: [tagId], references: [id])
+  tagId   Int
+
+  @@id([tradeId, tagId])
+}
+
+model Attachment {
+  id        Int      @id @default(autoincrement())
+  trade     Trade    @relation(fields: [tradeId], references: [id])
+  tradeId   Int
+  url       String
+  createdAt DateTime @default(now())
+}
+
+model RiskPolicy {
+  id                       Int      @id @default(autoincrement())
+  user                     User     @relation(fields: [userId], references: [id])
+  userId                   Int      @unique
+  maxRiskPerTrade          Float?
+  maxDailyLoss             Float?
+  maxConsecutiveLosses     Int?
+  maxTradeDurationMinutes  Int?
+  updatedAt                DateTime @updatedAt
+}

@@ -1,0 +1,63 @@
+<div *ngIf="trade; else loading" class="grid">
+  <div class="card">
+    <h2>{{ trade.symbol }} ({{ trade.direction }})</h2>
+    <p>Status: {{ trade.status }}</p>
+    <p>Planned R/R: {{ trade.plannedRiskReward | number: '1.2-2' }}</p>
+    <p *ngIf="trade.rMultiple != null">Result R: {{ trade.rMultiple | number: '1.2-2' }}</p>
+    <p>Complied with plan: {{ trade.compliedWithPlan ? 'Yes' : 'No' }}</p>
+    <p>Notes: {{ trade.notes || '-' }}</p>
+    <p>Emotion: {{ trade.emotionalState || '-' }}</p>
+    <div>
+      <span *ngFor="let tag of trade.tags" class="tag">{{ tag.tag.name }}</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Timeline</h3>
+    <ul>
+      <li *ngFor="let event of trade.events">
+        <strong>{{ event.type }}</strong>
+        <span *ngIf="event.price"> @ {{ event.price }}</span>
+        <span *ngIf="event.note"> - {{ event.note }}</span>
+        <span> ({{ event.occurredAt | date: 'short' }})</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Add event</h3>
+    <form [formGroup]="eventForm" (ngSubmit)="addEvent()">
+      <label>Type</label>
+      <select formControlName="type">
+        <option value="ENTRY">Entry</option>
+        <option value="ADD">Add</option>
+        <option value="REDUCE">Reduce</option>
+        <option value="MOVE_SL">Move SL</option>
+        <option value="MOVE_TP">Move TP</option>
+        <option value="EXIT">Exit</option>
+        <option value="NOTE">Note</option>
+      </select>
+      <label>Price</label>
+      <input type="number" formControlName="price" step="0.0001" />
+      <label>Size</label>
+      <input type="number" formControlName="size" step="0.01" />
+      <label>Note</label>
+      <textarea formControlName="note" rows="2"></textarea>
+      <button type="submit">Add event</button>
+    </form>
+  </div>
+
+  <div class="card" *ngIf="trade.status !== 'CLOSED'">
+    <h3>Close trade</h3>
+    <form [formGroup]="closeForm" (ngSubmit)="closeTrade()">
+      <label>Exit price</label>
+      <input type="number" formControlName="exitPrice" step="0.0001" />
+      <button type="submit">Close trade</button>
+    </form>
+  </div>
+
+  <div *ngIf="message" class="alert warning">{{ message }}</div>
+</div>
+<ng-template #loading>
+  <p>Loading trade...</p>
+</ng-template>
