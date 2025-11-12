@@ -30,7 +30,7 @@ export class TradeDetailPageComponent implements OnInit {
   load() {
     this.loading = true;
     this.message = null;
-    const id = Number(this.route.snapshot.paramMap.get('id'));
+    const id = this.route.snapshot.paramMap.get('id') as string;
     this.api.getTrade(id).subscribe({
       next: (data: any) => {
         this.trade = data.trade;

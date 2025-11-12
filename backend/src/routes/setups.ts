@@ -29,7 +29,7 @@ router.post('/', body('name').isString(), body('description').optional().isStrin
 
 router.put(
   '/:id',
-  param('id').isInt({ min: 1 }),
+  param('id').isMongoId(),
   body('name').isString(),
   body('description').optional().isString(),
   async (req, res) => {
@@ -37,7 +37,7 @@ router.put(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const id = Number(req.params.id);
+    const id = req.params.id;
     const setup = await prisma.setup.findFirst({ where: { id, userId: req.user!.id } });
     if (!setup) {
       return res.status(404).json({ message: 'Setup not found' });
@@ -50,12 +50,12 @@ router.put(
   },
 );
 
-router.delete('/:id', param('id').isInt({ min: 1 }), async (req, res) => {
+router.delete('/:id', param('id').isMongoId(), async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  const id = Number(req.params.id);
+  const id = req.params.id;
   const setup = await prisma.setup.findFirst({ where: { id, userId: req.user!.id } });
   if (!setup) {
     return res.status(404).json({ message: 'Setup not found' });

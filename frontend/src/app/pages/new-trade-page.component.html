@@ -36,15 +36,15 @@
     <div>
       <label>Setup</label>
       <select formControlName="setupId">
-        <option [value]="null">None</option>
-        <option *ngFor="let setup of setups" [value]="setup.id">{{ setup.name }}</option>
+        <option [ngValue]="null">None</option>
+        <option *ngFor="let setup of setups" [ngValue]="setup.id">{{ setup.name }}</option>
       </select>
     </div>
     <div>
       <label>Account</label>
       <select formControlName="accountId">
-        <option [value]="null">Default</option>
-        <option *ngFor="let account of accounts" [value]="account.id">{{ account.name }}</option>
+        <option [ngValue]="null">Default</option>
+        <option *ngFor="let account of accounts" [ngValue]="account.id">{{ account.name }}</option>
       </select>
     </div>
     <div>

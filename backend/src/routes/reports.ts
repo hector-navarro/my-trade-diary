@@ -57,7 +57,7 @@ router.get('/overview', async (req, res) => {
     take: 5,
   });
 
-  const setupIds = bySetupRaw.map((item) => item.setupId).filter((id): id is number => id != null);
+  const setupIds = bySetupRaw.map((item) => item.setupId).filter((id): id is string => typeof id === 'string' && id.length > 0);
   const setups = await prisma.setup.findMany({ where: { id: { in: setupIds } } });
   const setupMap = new Map(setups.map((setup) => [setup.id, setup]));
   const bySetup = bySetupRaw.map((item) => ({

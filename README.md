@@ -17,6 +17,7 @@ Aplicación web full-stack (Node.js + Angular) para planificar, ejecutar y anali
 
 - Node.js 20+
 - npm 9+
+- MongoDB 6+ en ejecución local (o mediante Docker)
 - (Opcional) Docker y Docker Compose v2
 
 ## Configuración rápida (modo desarrollo)
@@ -27,7 +28,8 @@ Aplicación web full-stack (Node.js + Angular) para planificar, ejecutar y anali
 cd backend
 cp .env.example .env
 npm install
-npx prisma migrate dev --name init
+npm run prisma:generate
+npx prisma db push
 npm run dev
 ```
 
@@ -42,6 +44,8 @@ npm start
 ```
 
 Angular CLI servirá la SPA en `http://localhost:4200`. El proxy configurado (`proxy.conf.json`) reenvía las peticiones `/api` al backend local.
+
+> ℹ️ Asegúrate de tener MongoDB ejecutándose en `mongodb://localhost:27017/trade-diary` (puedes utilizar `docker compose up mongo` para iniciar un contenedor únicamente con la base de datos).
 
 ## Pruebas
 
@@ -71,7 +75,7 @@ docker compose up --build
 - Backend: http://localhost:4000
 - Frontend: http://localhost:4200
 
-El servicio de backend ejecuta automáticamente `prisma migrate deploy` y persiste la base de datos SQLite en un volumen Docker (`backend-data`).
+Se levanta un contenedor adicional de MongoDB (`mongo`) con persistencia en el volumen `mongo-data`. El backend aplica el esquema con `prisma db push` antes de iniciar el servidor Express.
 
 ## Endpoints destacados
 

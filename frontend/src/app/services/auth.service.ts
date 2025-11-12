@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 
 interface AuthResponse {
   token: string;
-  user: { id: number; email: string; name?: string };
+  user: { id: string; email: string; name?: string };
 }
 
 @Injectable({ providedIn: 'root' })

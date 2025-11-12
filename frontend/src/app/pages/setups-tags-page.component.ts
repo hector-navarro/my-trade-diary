@@ -44,7 +44,7 @@ export class SetupsTagsPageComponent implements OnInit {
     });
   }
 
-  deleteSetup(id: number) {
+  deleteSetup(id: string) {
     this.api.deleteSetup(id).subscribe(() => this.load());
   }
 
@@ -58,7 +58,7 @@ export class SetupsTagsPageComponent implements OnInit {
     });
   }
 
-  deleteTag(id: number) {
+  deleteTag(id: string) {
     this.api.deleteTag(id).subscribe(() => this.load());
   }
 
@@ -72,7 +72,7 @@ export class SetupsTagsPageComponent implements OnInit {
     });
   }
 
-  deleteAccount(id: number) {
+  deleteAccount(id: string) {
     this.api.deleteAccount(id).subscribe(() => this.load());
   }
 }

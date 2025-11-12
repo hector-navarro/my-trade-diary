@@ -27,12 +27,12 @@ router.post('/', body('name').isString(), async (req, res) => {
   res.status(201).json({ tag });
 });
 
-router.put('/:id', param('id').isInt({ min: 1 }), body('name').isString(), async (req, res) => {
+router.put('/:id', param('id').isMongoId(), body('name').isString(), async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  const id = Number(req.params.id);
+  const id = req.params.id;
   const tag = await prisma.tag.findFirst({ where: { id, userId: req.user!.id } });
   if (!tag) {
     return res.status(404).json({ message: 'Tag not found' });
@@ -41,12 +41,12 @@ router.put('/:id', param('id').isInt({ min: 1 }), body('name').isString(), async
   res.json({ tag: updated });
 });
 
-router.delete('/:id', param('id').isInt({ min: 1 }), async (req, res) => {
+router.delete('/:id', param('id').isMongoId(), async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  const id = Number(req.params.id);
+  const id = req.params.id;
   const tag = await prisma.tag.findFirst({ where: { id, userId: req.user!.id } });
   if (!tag) {
     return res.status(404).json({ message: 'Tag not found' });

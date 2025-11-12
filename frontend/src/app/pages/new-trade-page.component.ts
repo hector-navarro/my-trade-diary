@@ -27,7 +27,7 @@ export class NewTradePageComponent implements OnInit {
   tags: any[] = [];
   accounts: any[] = [];
   alerts: any[] = [];
-  createdTradeId: number | null = null;
+  createdTradeId: string | null = null;
   error: string | null = null;
 
   constructor(private fb: FormBuilder, private api: ApiService, public router: Router) {}
@@ -52,10 +52,21 @@ export class NewTradePageComponent implements OnInit {
       this.error = 'Please ensure the form is valid.';
       return;
     }
-    this.api.createTrade({
+    const payload = {
       ...this.form.value,
-      tags: (this.form.value.tags as number[]) || [],
-    }).subscribe({
+      setupId: this.form.value.setupId,
+      accountId: this.form.value.accountId,
+      tags: (this.form.value.tags as string[]) || [],
+    };
+
+    Object.keys(payload).forEach((key) => {
+      const value = (payload as any)[key];
+      if (value === null || value === '') {
+        delete (payload as any)[key];
+      }
+    });
+
+    this.api.createTrade(payload).subscribe({
       next: (data: any) => {
         this.alerts = data.alerts || [];
         this.createdTradeId = data.trade.id;

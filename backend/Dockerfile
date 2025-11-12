@@ -5,5 +5,5 @@ RUN npm install
 COPY prisma ./prisma
 COPY tsconfig.json ./
 COPY src ./src
-RUN npm run build && npm run prisma:generate
+RUN npm run prisma:generate && npm run build
 CMD ["node", "dist/index.js"]

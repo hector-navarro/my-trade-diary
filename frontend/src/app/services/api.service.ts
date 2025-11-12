@@ -16,7 +16,7 @@ export class ApiService {
     return this.http.get('/api/trades', { params });
   }
 
-  getTrade(id: number) {
+  getTrade(id: string) {
     return this.http.get(`/api/trades/${id}`);
   }
 
@@ -24,15 +24,15 @@ export class ApiService {
     return this.http.post('/api/trades', payload);
   }
 
-  updateTrade(id: number, payload: any) {
+  updateTrade(id: string, payload: any) {
     return this.http.put(`/api/trades/${id}`, payload);
   }
 
-  closeTrade(id: number, payload: any) {
+  closeTrade(id: string, payload: any) {
     return this.http.post(`/api/trades/${id}/close`, payload);
   }
 
-  addEvent(id: number, payload: any) {
+  addEvent(id: string, payload: any) {
     return this.http.post(`/api/trades/${id}/events`, payload);
   }
 
@@ -44,11 +44,11 @@ export class ApiService {
     return this.http.post('/api/setups', payload);
   }
 
-  updateSetup(id: number, payload: any) {
+  updateSetup(id: string, payload: any) {
     return this.http.put(`/api/setups/${id}`, payload);
   }
 
-  deleteSetup(id: number) {
+  deleteSetup(id: string) {
     return this.http.delete(`/api/setups/${id}`);
   }
 
@@ -60,11 +60,11 @@ export class ApiService {
     return this.http.post('/api/tags', payload);
   }
 
-  updateTag(id: number, payload: any) {
+  updateTag(id: string, payload: any) {
     return this.http.put(`/api/tags/${id}`, payload);
   }
 
-  deleteTag(id: number) {
+  deleteTag(id: string) {
     return this.http.delete(`/api/tags/${id}`);
   }
 
@@ -92,7 +92,7 @@ export class ApiService {
     return this.http.post('/api/accounts', payload);
   }
 
-  deleteAccount(id: number) {
+  deleteAccount(id: string) {
     return this.http.delete(`/api/accounts/${id}`);
   }
 }

@@ -6,7 +6,7 @@ import { prisma } from '../utils/prisma';
 declare global {
   namespace Express {
     interface Request {
-      user?: { id: number; email: string };
+      user?: { id: string; email: string };
     }
   }
 }
@@ -24,7 +24,7 @@ export const authenticate = async (
   const token = header.replace('Bearer ', '');
 
   try {
-    const payload = jwt.verify(token, config.jwtSecret) as { userId: number };
+    const payload = jwt.verify(token, config.jwtSecret) as { userId: string };
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
       select: { id: true, email: true },

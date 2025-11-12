@@ -71,7 +71,7 @@ router.get('/me', async (req, res) => {
   }
   try {
     const token = header.replace('Bearer ', '');
-    const payload = jwt.verify(token, config.jwtSecret) as { userId: number };
+    const payload = jwt.verify(token, config.jwtSecret) as { userId: string };
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
       select: {

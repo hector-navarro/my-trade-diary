@@ -15,11 +15,21 @@ const tradeValidations = [
   body('plannedTakeProfit').isFloat().toFloat(),
   body('maxHoldMinutes').optional().isInt({ min: 1 }).toInt(),
   body('plannedRiskAmount').optional().isFloat({ min: 0 }).toFloat(),
-  body('setupId').optional().isInt({ min: 1 }).toInt(),
-  body('accountId').optional().isInt({ min: 1 }).toInt(),
+  body('setupId').optional({ nullable: true }).isMongoId(),
+  body('accountId').optional({ nullable: true }).isMongoId(),
   body('tags').optional().isArray(),
-  body('tags.*').optional().isInt({ min: 1 }).toInt(),
+  body('tags.*').optional().isMongoId(),
 ];
+
+const normalizeRelationId = (value: unknown): string | null | undefined => {
+  if (typeof value === 'string' && value.length > 0) {
+    return value;
+  }
+  if (value === null) {
+    return null;
+  }
+  return undefined;
+};
 
 const validateTradePlan = (direction: TradeDirection, entry: number, stop: number, takeProfit: number) => {
   if (direction === TradeDirection.LONG) {
@@ -31,6 +41,7 @@ const validateTradePlan = (direction: TradeDirection, entry: number, stop: numbe
 router.get(
   '/',
   query('status').optional().isIn(Object.values(TradeStatus)),
+  query('setupId').optional().isMongoId(),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -44,7 +55,7 @@ router.get(
         status: status ? (status as TradeStatus) : undefined,
         symbol: symbol ? { contains: symbol as string, mode: 'insensitive' } : undefined,
         direction: direction ? (direction as TradeDirection) : undefined,
-        setupId: setupId ? Number(setupId) : undefined,
+        setupId: typeof setupId === 'string' ? setupId : undefined,
         createdAt: {
           gte: from ? new Date(from as string) : undefined,
           lte: to ? new Date(to as string) : undefined,
@@ -84,8 +95,8 @@ router.post('/', tradeValidations, async (req, res) => {
     plannedStopLoss,
     plannedTakeProfit,
     maxHoldMinutes,
-    setupId,
-    accountId,
+    setupId: rawSetupId,
+    accountId: rawAccountId,
     notes,
     emotionalState,
     plannedRiskAmount,
@@ -96,21 +107,23 @@ router.post('/', tradeValidations, async (req, res) => {
     return res.status(400).json({ message: 'Invalid plan for trade direction' });
   }
 
-  if (setupId) {
+  const setupId = normalizeRelationId(rawSetupId);
+  if (typeof setupId === 'string') {
     const setup = await prisma.setup.findFirst({ where: { id: setupId, userId } });
     if (!setup) {
       return res.status(400).json({ message: 'Invalid setup' });
     }
   }
 
-  if (accountId) {
+  const accountId = normalizeRelationId(rawAccountId);
+  if (typeof accountId === 'string') {
     const account = await prisma.account.findFirst({ where: { id: accountId, userId } });
     if (!account) {
       return res.status(400).json({ message: 'Invalid account' });
     }
   }
 
-  const tagIds = Array.isArray(tags) ? (tags as (number | string)[]).map((tagId) => Number(tagId)) : [];
+  const tagIds = Array.isArray(tags) ? (tags as string[]).filter((tagId) => typeof tagId === 'string') : [];
 
   if (tagIds.length) {
     const tagCount = await prisma.tag.count({ where: { id: { in: tagIds }, userId } });
@@ -162,12 +175,12 @@ router.post('/', tradeValidations, async (req, res) => {
   res.status(201).json({ trade, alerts });
 });
 
-router.get('/:id', param('id').isInt({ min: 1 }), async (req, res) => {
+router.get('/:id', param('id').isMongoId(), async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  const id = Number(req.params.id);
+  const id = req.params.id;
   const userId = req.user!.id;
   const trade = await prisma.trade.findFirst({
     where: { id, userId },
@@ -185,12 +198,12 @@ router.get('/:id', param('id').isInt({ min: 1 }), async (req, res) => {
   res.json({ trade });
 });
 
-router.put('/:id', param('id').isInt({ min: 1 }), tradeValidations, async (req, res) => {
+router.put('/:id', param('id').isMongoId(), tradeValidations, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  const id = Number(req.params.id);
+  const id = req.params.id;
   const userId = req.user!.id;
   const existing = await prisma.trade.findFirst({ where: { id, userId } });
   if (!existing) {
@@ -204,8 +217,8 @@ router.put('/:id', param('id').isInt({ min: 1 }), tradeValidations, async (req, 
     plannedStopLoss,
     plannedTakeProfit,
     maxHoldMinutes,
-    setupId,
-    accountId,
+    setupId: rawSetupId,
+    accountId: rawAccountId,
     notes,
     emotionalState,
     plannedRiskAmount,
@@ -216,21 +229,23 @@ router.put('/:id', param('id').isInt({ min: 1 }), tradeValidations, async (req, 
     return res.status(400).json({ message: 'Invalid plan for trade direction' });
   }
 
-  if (setupId) {
+  const setupId = normalizeRelationId(rawSetupId);
+  if (typeof setupId === 'string') {
     const setup = await prisma.setup.findFirst({ where: { id: setupId, userId } });
     if (!setup) {
       return res.status(400).json({ message: 'Invalid setup' });
     }
   }
 
-  if (accountId) {
+  const accountId = normalizeRelationId(rawAccountId);
+  if (typeof accountId === 'string') {
     const account = await prisma.account.findFirst({ where: { id: accountId, userId } });
     if (!account) {
       return res.status(400).json({ message: 'Invalid account' });
     }
   }
 
-  const tagIdsUpdate = Array.isArray(tags) ? (tags as (number | string)[]).map((tagId) => Number(tagId)) : [];
+  const tagIdsUpdate = Array.isArray(tags) ? (tags as string[]).filter((tagId) => typeof tagId === 'string') : [];
 
   if (tagIdsUpdate.length) {
     const tagCount = await prisma.tag.count({ where: { id: { in: tagIdsUpdate }, userId } });
@@ -274,12 +289,12 @@ router.put('/:id', param('id').isInt({ min: 1 }), tradeValidations, async (req, 
   res.json({ trade });
 });
 
-router.delete('/:id', param('id').isInt({ min: 1 }), async (req, res) => {
+router.delete('/:id', param('id').isMongoId(), async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  const id = Number(req.params.id);
+  const id = req.params.id;
   const userId = req.user!.id;
   const trade = await prisma.trade.findFirst({ where: { id, userId } });
   if (!trade) {
@@ -294,7 +309,7 @@ router.delete('/:id', param('id').isInt({ min: 1 }), async (req, res) => {
 
 router.post(
   '/:id/events',
-  param('id').isInt({ min: 1 }),
+  param('id').isMongoId(),
   body('type').isIn(Object.values(TradeEventType)),
   body('price').optional().isFloat({ min: 0 }).toFloat(),
   body('size').optional().isFloat({ min: 0 }).toFloat(),
@@ -305,7 +320,7 @@ router.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const id = Number(req.params.id);
+    const id = req.params.id;
     const userId = req.user!.id;
     const trade = await prisma.trade.findFirst({ where: { id, userId } });
     if (!trade) {
@@ -335,7 +350,7 @@ router.post(
 
 router.post(
   '/:id/close',
-  param('id').isInt({ min: 1 }),
+  param('id').isMongoId(),
   body('exitPrice').isFloat().toFloat(),
   body('closedAt').optional().isISO8601(),
   async (req, res) => {
@@ -343,7 +358,7 @@ router.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const id = Number(req.params.id);
+    const id = req.params.id;
     const userId = req.user!.id;
     const trade = await prisma.trade.findFirst({
       where: { id, userId },
@@ -359,9 +374,8 @@ router.post(
       plannedStopLoss: trade.plannedStopLoss,
       direction: trade.direction,
     });
-    const pnl = trade.direction === TradeDirection.LONG
-      ? exitPrice - trade.plannedEntry
-      : trade.plannedEntry - exitPrice;
+    const pnl =
+      trade.direction === TradeDirection.LONG ? exitPrice - trade.plannedEntry : trade.plannedEntry - exitPrice;
     const rMultiple = calculateRMultiple(trade, exitPrice);
 
     let events = trade.events;

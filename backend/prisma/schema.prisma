@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
@@ -30,7 +30,7 @@ enum TradeEventType {
 }
 
 model User {
-  id           Int          @id @default(autoincrement())
+  id           String       @id @default(auto()) @map("_id") @db.ObjectId
   email        String       @unique
   passwordHash String
   name         String?
@@ -44,43 +44,43 @@ model User {
 }
 
 model Account {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String
+  userId    String   @db.ObjectId
   user      User     @relation(fields: [userId], references: [id])
-  userId    Int
   currency  String   @default("USD")
   createdAt DateTime @default(now())
   trades    Trade[]
 }
 
 model Setup {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    Int
-  name      String
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String  @db.ObjectId
+  user        User    @relation(fields: [userId], references: [id])
+  name        String
   description String?
-  trades    Trade[]
+  trades      Trade[]
 }
 
 model Tag {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    Int
-  name      String
-  trades    TradeTag[]
+  id      String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId  String     @db.ObjectId
+  user    User       @relation(fields: [userId], references: [id])
+  name    String
+  trades  TradeTag[]
 }
 
 model Trade {
-  id                   Int             @id @default(autoincrement())
-  user                 User            @relation(fields: [userId], references: [id])
-  userId               Int
-  account              Account?        @relation(fields: [accountId], references: [id])
-  accountId            Int?
-  setup                Setup?          @relation(fields: [setupId], references: [id])
-  setupId              Int?
+  id                   String         @id @default(auto()) @map("_id") @db.ObjectId
+  userId               String         @db.ObjectId
+  user                 User           @relation(fields: [userId], references: [id])
+  accountId            String?        @db.ObjectId
+  account              Account?       @relation(fields: [accountId], references: [id])
+  setupId              String?        @db.ObjectId
+  setup                Setup?         @relation(fields: [setupId], references: [id])
   symbol               String
   direction            TradeDirection
-  status               TradeStatus     @default(PLANNED)
+  status               TradeStatus    @default(PLANNED)
   plannedEntry         Float
   plannedStopLoss      Float
   plannedTakeProfit    Float
@@ -89,8 +89,8 @@ model Trade {
   maxHoldMinutes       Int?
   notes                String?
   emotionalState       String?
-  createdAt            DateTime        @default(now())
-  updatedAt            DateTime        @updatedAt
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
   closedAt             DateTime?
   actualEntryPrice     Float?
   actualExitPrice      Float?
@@ -103,40 +103,41 @@ model Trade {
 }
 
 model TradeEvent {
-  id        Int            @id @default(autoincrement())
-  trade     Trade          @relation(fields: [tradeId], references: [id])
-  tradeId   Int
-  type      TradeEventType
-  price     Float?
-  size      Float?
-  occurredAt DateTime      @default(now())
-  note      String?
+  id         String         @id @default(auto()) @map("_id") @db.ObjectId
+  tradeId    String         @db.ObjectId
+  trade      Trade          @relation(fields: [tradeId], references: [id])
+  type       TradeEventType
+  price      Float?
+  size       Float?
+  occurredAt DateTime       @default(now())
+  note       String?
 }
 
 model TradeTag {
-  trade   Trade @relation(fields: [tradeId], references: [id])
-  tradeId Int
-  tag     Tag   @relation(fields: [tagId], references: [id])
-  tagId   Int
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  tradeId String @db.ObjectId
+  tagId   String @db.ObjectId
+  trade   Trade  @relation(fields: [tradeId], references: [id])
+  tag     Tag    @relation(fields: [tagId], references: [id])
 
-  @@id([tradeId, tagId])
+  @@unique([tradeId, tagId])
 }
 
 model Attachment {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  tradeId   String   @db.ObjectId
   trade     Trade    @relation(fields: [tradeId], references: [id])
-  tradeId   Int
   url       String
   createdAt DateTime @default(now())
 }
 
 model RiskPolicy {
-  id                       Int      @id @default(autoincrement())
-  user                     User     @relation(fields: [userId], references: [id])
-  userId                   Int      @unique
-  maxRiskPerTrade          Float?
-  maxDailyLoss             Float?
-  maxConsecutiveLosses     Int?
-  maxTradeDurationMinutes  Int?
-  updatedAt                DateTime @updatedAt
+  id                      String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId                  String   @unique @db.ObjectId
+  user                    User     @relation(fields: [userId], references: [id])
+  maxRiskPerTrade         Float?
+  maxDailyLoss            Float?
+  maxConsecutiveLosses    Int?
+  maxTradeDurationMinutes Int?
+  updatedAt               DateTime @updatedAt
 }

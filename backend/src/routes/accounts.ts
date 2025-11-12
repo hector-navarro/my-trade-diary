@@ -27,26 +27,32 @@ router.post('/', body('name').isString(), body('currency').optional().isString()
   res.status(201).json({ account });
 });
 
-router.put('/:id', param('id').isInt({ min: 1 }), body('name').isString(), body('currency').optional().isString(), async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  const id = Number(req.params.id);
-  const account = await prisma.account.findFirst({ where: { id, userId: req.user!.id } });
-  if (!account) {
-    return res.status(404).json({ message: 'Account not found' });
-  }
-  const updated = await prisma.account.update({ where: { id }, data: { name: req.body.name, currency: req.body.currency } });
-  res.json({ account: updated });
-});
+router.put(
+  '/:id',
+  param('id').isMongoId(),
+  body('name').isString(),
+  body('currency').optional().isString(),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const id = req.params.id;
+    const account = await prisma.account.findFirst({ where: { id, userId: req.user!.id } });
+    if (!account) {
+      return res.status(404).json({ message: 'Account not found' });
+    }
+    const updated = await prisma.account.update({ where: { id }, data: { name: req.body.name, currency: req.body.currency } });
+    res.json({ account: updated });
+  },
+);
 
-router.delete('/:id', param('id').isInt({ min: 1 }), async (req, res) => {
+router.delete('/:id', param('id').isMongoId(), async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  const id = Number(req.params.id);
+  const id = req.params.id;
   const account = await prisma.account.findFirst({ where: { id, userId: req.user!.id } });
   if (!account) {
     return res.status(404).json({ message: 'Account not found' });

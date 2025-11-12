@@ -13,7 +13,7 @@ export interface RiskTradeInput {
   plannedRiskAmount?: number | null;
 }
 
-export const evaluateRiskForNewTrade = async (userId: number, trade: RiskTradeInput) => {
+export const evaluateRiskForNewTrade = async (userId: string, trade: RiskTradeInput) => {
   const alerts: RiskAlert[] = [];
   const policy = await prisma.riskPolicy.findUnique({ where: { userId } });
   if (!policy) {
@@ -28,7 +28,7 @@ export const evaluateRiskForNewTrade = async (userId: number, trade: RiskTradeIn
   return alerts;
 };
 
-export const evaluateRiskOnClose = async (userId: number) => {
+export const evaluateRiskOnClose = async (userId: string) => {
   const alerts: RiskAlert[] = [];
   const policy = await prisma.riskPolicy.findUnique({ where: { userId } });
   if (!policy) {
